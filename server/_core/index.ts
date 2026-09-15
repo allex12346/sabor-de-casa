@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
+import { restRouter } from "../restRoutes";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -37,6 +38,8 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // tRPC API
+  // REST API endpoints specified in requirements
+  app.use("/api/v1", restRouter);
   app.use(
     "/api/trpc",
     createExpressMiddleware({
