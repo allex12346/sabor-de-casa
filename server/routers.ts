@@ -2,7 +2,7 @@ import { z } from "zod";
 import { COOKIE_NAME } from "../shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 
 export const appRouter = router({
@@ -44,7 +44,7 @@ export const appRouter = router({
       }),
 
     // Opcional: CRUD básico de produtos (Diferencial)
-    criar: publicProcedure
+    criar: adminProcedure
       .input(
         z.object({
           nome: z.string().min(2),
@@ -68,7 +68,7 @@ export const appRouter = router({
         return { id };
       }),
 
-    atualizar: publicProcedure
+    atualizar: adminProcedure
       .input(
         z.object({
           id: z.number(),
@@ -92,7 +92,7 @@ export const appRouter = router({
         return produto;
       }),
 
-    excluir: publicProcedure
+    excluir: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         return await db.deletarProduto(input.id);

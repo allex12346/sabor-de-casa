@@ -72,8 +72,9 @@ export default function Home() {
     setSessionId(id);
     const savedNome = localStorage.getItem("sabor_cliente_nome") || "";
     const savedMesa = localStorage.getItem("sabor_cliente_mesa") || "1";
+    const mesaDaUrl = new URLSearchParams(window.location.search).get("mesa");
     setNomeCliente(savedNome);
-    setNumeroMesa(savedMesa);
+    setNumeroMesa(mesaDaUrl?.trim() || savedMesa);
   }, []);
 
   const utils = trpc.useUtils();

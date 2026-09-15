@@ -5,7 +5,17 @@ import { carregarDetalhesPedido, criarPedidoExplicito } from "./db";
 
 function createMockContext(): TrpcContext {
   return {
-    user: null,
+    user: {
+      id: 1,
+      openId: "admin-test-user",
+      name: "Admin Teste",
+      email: "admin@example.com",
+      loginMethod: "test",
+      role: "admin",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      lastSignedIn: new Date(),
+    },
     req: {
       protocol: "https",
       headers: {},

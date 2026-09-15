@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { toast } from "sonner";
-import { ArrowLeft, Edit3, Plus, Search, Trash2, CheckCircle } from "lucide-react";
+import { ArrowLeft, Edit3, Plus, Search, Trash2, CheckCircle, QrCode, Download, LogIn, ShieldAlert } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { startLogin } from "@/const";
+import { useAuth } from "@/_core/hooks/useAuth";
+import QRCode from "qrcode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +38,7 @@ type ProdutoEditavel = {
 };
 
 export default function AdminProdutos() {
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const [busca, setBusca] = useState("");
   const [categoria, setCategoria] = useState("TODOS");
   const [modalAberto, setModalAberto] = useState(false);
@@ -45,6 +49,8 @@ export default function AdminProdutos() {
   const [catSelecionada, setCatSelecionada] = useState<string>("ENTRADAS");
   const [imagem, setImagem] = useState("");
   const [destaque, setDestaque] = useState(0);
+  const [mesaQr, setMesaQr] = useState("1");
+  const [qrDataUrl, setQrDataUrl] = useState("");
 
   const utils = trpc.useUtils();
   const { data: produtos = [], isLoading } = trpc.produtos.listar.useQuery({
@@ -150,6 +156,55 @@ export default function AdminProdutos() {
 
   const salvando = criarMutation.isPending || atualizarMutation.isPending;
 
+  const qrUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/?mesa=${encodeURIComponent(mesaQr || "1")}`
+    : `/?mesa=${encodeURIComponent(mesaQr || "1")}`;
+
+  useEffect(() => {
+    let ativo = true;
+    QRCode.toDataURL(qrUrl, {
+      width: 320,
+      margin: 2,
+      errorCorrectionLevel: "M",
+      color: { dark: "#17120f", light: "#ffffff" },
+    }).then((dataUrl) => {
+      if (ativo) setQrDataUrl(dataUrl);
+    }).catch(() => {
+      if (ativo) setQrDataUrl("");
+    });
+    return () => { ativo = false; };
+  }, [qrUrl]);
+
+  if (authLoading) {
+    return <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 grid place-items-center"><p className="text-sm text-stone-500">Verificando acesso administrativo...</p></div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 grid place-items-center p-6">
+        <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-8 text-center shadow-sm">
+          <ShieldAlert className="w-12 h-12 mx-auto mb-4 text-orange-700" />
+          <h1 className="font-serif-title text-2xl font-bold">Área restrita</h1>
+          <p className="text-sm text-stone-500 mt-2 mb-6">Entre com sua conta Manus para acessar o painel administrativo.</p>
+          <div className="flex justify-center gap-2"><Link href="/"><Button variant="outline" className="rounded-xl">Voltar</Button></Link><Button onClick={() => startLogin()} className="rounded-xl bg-orange-700 hover:bg-orange-800 text-white gap-2"><LogIn className="w-4 h-4" /> Entrar</Button></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (user?.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 grid place-items-center p-6">
+        <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 p-8 text-center shadow-sm">
+          <ShieldAlert className="w-12 h-12 mx-auto mb-4 text-red-600" />
+          <h1 className="font-serif-title text-2xl font-bold">Acesso não autorizado</h1>
+          <p className="text-sm text-stone-500 mt-2 mb-6">Sua conta está autenticada, mas não possui permissão de administrador.</p>
+          <Link href="/"><Button variant="outline" className="rounded-xl">Voltar ao cardápio</Button></Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-stone-50 dark:bg-stone-950 text-stone-900 dark:text-stone-100 flex flex-col">
       <header className="bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 px-4 sm:px-8 py-5">
@@ -187,6 +242,19 @@ export default function AdminProdutos() {
             ))}
           </div>
         </div>
+
+        <section className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-5 flex flex-col md:flex-row gap-6 items-center">
+          <div className="flex-1 w-full">
+            <div className="flex items-center gap-2 mb-1"><QrCode className="w-5 h-5 text-orange-700" /><h2 className="font-bold text-base">QR Code por mesa</h2></div>
+            <p className="text-xs text-stone-500 mb-4">Gere um QR Code que abre o cardápio com o número da mesa preenchido automaticamente.</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input type="number" min="1" max="999" value={mesaQr} onChange={(e) => setMesaQr(e.target.value)} aria-label="Número da mesa para o QR Code" placeholder="Número da mesa" className="sm:max-w-xs" />
+              {qrDataUrl && <a href={qrDataUrl} download={`qrcode-mesa-${mesaQr || "1"}.png`}><Button type="button" variant="outline" className="rounded-xl gap-2 w-full sm:w-auto"><Download className="w-4 h-4" /> Baixar QR Code</Button></a>}
+            </div>
+            <p className="text-[11px] text-stone-400 mt-3 break-all">Link: {qrUrl}</p>
+          </div>
+          {qrDataUrl ? <img src={qrDataUrl} alt={`QR Code para a mesa ${mesaQr || "1"}`} className="w-40 h-40 rounded-xl border border-stone-200 p-2 bg-white" /> : <div className="w-40 h-40 rounded-xl bg-stone-100 dark:bg-stone-800 animate-pulse" />}
+        </section>
 
         <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 overflow-hidden shadow-xs">
           <div className="p-4 border-b border-stone-200 dark:border-stone-800 flex items-center justify-between">
