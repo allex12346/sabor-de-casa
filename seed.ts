@@ -12,6 +12,7 @@ import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { produtos, CATEGORIAS_VALIDAS } from "./drizzle/schema.js";
 import { count } from "drizzle-orm";
+import { pathToFileURL } from "node:url";
 
 interface RawProduct {
   nome: string;
@@ -1151,7 +1152,9 @@ async function main() {
   await pool.end();
 }
 
-main().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error("Seed failed:", err);
+    process.exit(1);
+  });
+}

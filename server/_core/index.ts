@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { restRouter } from "../restRoutes";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { ensureDatabaseReady } from "../bootstrap";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -30,6 +31,12 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  try {
+    await ensureDatabaseReady();
+  } catch (error) {
+    console.error("[Database] Server will start, but database initialization did not complete", error);
+  }
+
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads

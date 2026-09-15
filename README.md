@@ -205,12 +205,7 @@ O projeto atual foi estruturado para rodar como um único processo Node.js, serv
    OWNER_NAME=Nome do proprietário
    ```
 5. Crie um banco MySQL/TiDB gerenciado. Copie sua string para `DATABASE_URL`.
-6. Após o primeiro deploy, execute a migração e o seed usando um Shell temporário do Render ou um job de release:
-   ```bash
-   pnpm drizzle-kit generate
-   npx tsx seed.ts
-   ```
-   O `seed.ts` limpa a tabela `produtos` antes de inserir os 150 itens; execute-o somente quando quiser repopular o catálogo.
+6. **Plano gratuito sem Shell:** não é necessário executar comandos manualmente. Na inicialização, o servidor cria automaticamente as tabelas `users`, `produtos`, `pedidos` e `itens_pedido` e insere os 150 produtos quando a tabela `produtos` está vazia. Basta configurar `DATABASE_URL` antes do primeiro boot.
 7. Teste a URL permanente:
    ```bash
    curl https://SEU-SERVICO.onrender.com/api/v1/produtos
@@ -219,7 +214,7 @@ O projeto atual foi estruturado para rodar como um único processo Node.js, serv
      -d '{"sessionId":"sess_deploy_1","nomeCliente":"Cliente Teste","numeroMesa":"1"}'
    ```
 
-O Render injeta a variável `PORT` automaticamente; o servidor já usa essa variável e não deve ter uma porta fixa hardcoded em produção.
+O Render injeta a variável `PORT` automaticamente; o servidor já usa essa variável e não deve ter uma porta fixa hardcoded em produção. O `seed.ts` continua disponível para execução manual em provedores que oferecem Shell, mas não é necessário no Render Free.
 
 ### Alternativa: Vercel para front-end separado + Render para API
 
