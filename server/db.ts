@@ -253,6 +253,41 @@ export async function obterOuCriarPedidoAberto(sessionId: string): Promise<Pedid
   return await carregarDetalhesPedido(pedido.id);
 }
 
+/**
+ * Cria explicitamente um novo pedido aberto. Usado pelo endpoint POST /api/v1/pedidos
+ * quando uma integração externa precisa iniciar o pedido antes de adicionar itens.
+ */
+export async function criarPedidoExplicito(dados: {
+  sessionId: string;
+  nomeCliente: string;
+  numeroMesa: string;
+  observacoes?: string;
+  incluiTaxaGarcom?: boolean;
+}) {
+  const database = await getDb();
+  if (!database) throw new Error("Database not connected");
+
+  const nomeCliente = dados.nomeCliente.trim();
+  const numeroMesa = dados.numeroMesa.trim();
+  if (!dados.sessionId.trim()) throw new Error("sessionId é obrigatório");
+  if (!nomeCliente) throw new Error("nomeCliente é obrigatório");
+  if (!numeroMesa) throw new Error("numeroMesa é obrigatório");
+
+  const [resultado] = await database.insert(pedidos).values({
+    sessionId: dados.sessionId.trim(),
+    nomeCliente,
+    numeroMesa,
+    observacoes: dados.observacoes?.trim() || null,
+    incluiTaxaGarcom: dados.incluiTaxaGarcom === false ? 0 : 1,
+    status: "aberto",
+    subtotal: "0.00",
+    taxaGarcom: "0.00",
+    total: "0.00",
+  });
+
+  return await carregarDetalhesPedido(resultado.insertId);
+}
+
 export async function carregarDetalhesPedido(pedidoId: number): Promise<PedidoComItens> {
   const db = await getDb();
   if (!db) throw new Error("Database not connected");

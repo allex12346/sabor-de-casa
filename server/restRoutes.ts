@@ -47,6 +47,39 @@ restRouter.get("/produtos/:id", async (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/v1/pedidos
+ * Body: { sessionId, nomeCliente, numeroMesa, observacoes?, incluiTaxaGarcom? }
+ * Cria explicitamente um pedido aberto antes da inclusão de itens.
+ */
+restRouter.post("/pedidos", async (req: Request, res: Response) => {
+  try {
+    const { sessionId, nomeCliente, numeroMesa, observacoes, incluiTaxaGarcom } = req.body;
+    if (!sessionId || !nomeCliente || !numeroMesa) {
+      return res.status(400).json({
+        success: false,
+        error: "sessionId, nomeCliente e numeroMesa são obrigatórios",
+      });
+    }
+
+    const pedido = await db.criarPedidoExplicito({
+      sessionId: String(sessionId),
+      nomeCliente: String(nomeCliente),
+      numeroMesa: String(numeroMesa),
+      observacoes: observacoes ? String(observacoes) : undefined,
+      incluiTaxaGarcom: incluiTaxaGarcom === undefined ? true : Boolean(incluiTaxaGarcom),
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Pedido aberto criado com sucesso!",
+      data: pedido,
+    });
+  } catch (err: any) {
+    return res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+/**
  * GET /api/v1/pedidos/carrinho/:sessionId
  */
 restRouter.get("/pedidos/carrinho/:sessionId", async (req: Request, res: Response) => {

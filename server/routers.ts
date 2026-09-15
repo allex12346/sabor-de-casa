@@ -67,6 +67,36 @@ export const appRouter = router({
         });
         return { id };
       }),
+
+    atualizar: publicProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          nome: z.string().min(2),
+          descricao: z.string().min(5),
+          preco: z.string().regex(/^\d+(\.\d{1,2})?$/),
+          categoria: z.string(),
+          imagem: z.string().optional(),
+          destaque: z.number().optional().default(0),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const produto = await db.atualizarProduto(input.id, {
+          nome: input.nome,
+          descricao: input.descricao,
+          preco: input.preco,
+          categoria: input.categoria,
+          imagem: input.imagem || null,
+          destaque: input.destaque ?? 0,
+        });
+        return produto;
+      }),
+
+    excluir: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.deletarProduto(input.id);
+      }),
   }),
 
   // ===================== PEDIDOS & CARRINHO =====================
