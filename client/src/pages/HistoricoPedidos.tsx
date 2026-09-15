@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   ArrowLeft,
   Receipt,
@@ -43,6 +44,7 @@ export default function HistoricoPedidos() {
               </p>
             </div>
           </div>
+          <ThemeToggle />
         </div>
       </header>
 

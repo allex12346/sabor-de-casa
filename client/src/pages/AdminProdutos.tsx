@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { ArrowLeft, Edit3, Plus, Search, Trash2, CheckCircle } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -164,9 +165,12 @@ export default function AdminProdutos() {
               <p className="text-xs text-stone-500">Cadastre, edite e desative itens no banco de dados</p>
             </div>
           </div>
-          <Button onClick={abrirNovo} className="rounded-xl bg-orange-700 hover:bg-orange-800 text-white font-semibold text-xs sm:text-sm px-4 gap-2 whitespace-nowrap">
-            <Plus className="w-4 h-4" /> Cadastrar Produto
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button onClick={abrirNovo} className="rounded-xl bg-orange-700 hover:bg-orange-800 text-white font-semibold text-xs sm:text-sm px-4 gap-2 whitespace-nowrap">
+              <Plus className="w-4 h-4" /> Cadastrar Produto
+            </Button>
+          </div>
         </div>
       </header>
 
