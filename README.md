@@ -205,7 +205,7 @@ O projeto atual foi estruturado para rodar como um único processo Node.js, serv
    OWNER_NAME=Nome do proprietário
    ```
 5. Crie um banco MySQL/TiDB gerenciado. Copie sua string para `DATABASE_URL`.
-6. **Plano gratuito sem Shell:** não é necessário executar comandos manualmente. Na inicialização, o servidor cria automaticamente as tabelas `users`, `produtos`, `pedidos` e `itens_pedido` e insere os 150 produtos quando a tabela `produtos` está vazia. Basta configurar `DATABASE_URL` antes do primeiro boot.
+6. **Plano gratuito sem Shell:** não é necessário executar comandos manualmente. Na inicialização, o servidor cria automaticamente as tabelas `users`, `produtos`, `pedidos` e `itens_pedido` e insere os 150 produtos quando a tabela `produtos` está vazia. Basta configurar `DATABASE_URL` antes do primeiro boot. Use a URL **pública/externa** fornecida pelo Railway ou TiDB Cloud; não use endereços como `mysql.railway.internal`, pois eles só funcionam dentro da rede privada do Railway e não resolvem no Render.
 7. Teste a URL permanente:
    ```bash
    curl https://SEU-SERVICO.onrender.com/api/v1/produtos

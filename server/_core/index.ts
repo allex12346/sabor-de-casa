@@ -31,12 +31,6 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
-  try {
-    await ensureDatabaseReady();
-  } catch (error) {
-    console.error("[Database] Server will start, but database initialization did not complete", error);
-  }
-
   const app = express();
   const server = createServer(app);
   // Configure body parser with larger size limit for file uploads
@@ -70,6 +64,9 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    void ensureDatabaseReady().catch((error) => {
+      console.error("[Database] Bootstrap skipped; verify DATABASE_URL uses an external hostname", error);
+    });
   });
 }
 
